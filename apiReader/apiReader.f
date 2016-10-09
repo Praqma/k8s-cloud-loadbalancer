@@ -47,8 +47,10 @@ function getServiceEndpoints(){
     namespace=$(getServiceNamespace $service)
   fi
 
+  # fetch endpoint section from a service json
   local subset=$(curl -s $url/api/v1/namespaces/$namespace/endpoints/$service | jq -r '.subsets[]')
 
+  # If it has endpoints, get each of them and print them
   if [ ! -z "$subset" ]; then
     echo $(curl -s $url/api/v1/namespaces/$namespace/endpoints/$service | jq -r '.subsets[].addresses[].ip')
 
@@ -108,6 +110,7 @@ function getEventsAll(){
 
 
 function formatEventStream(){
+  # This is an example on how apiReader could be used. We fect a json stream, and compute each chunk.
   # http://stackoverflow.com/questions/30272651/redirect-curl-to-while-loop
   while read -r l; do
     resourceVersion=$(echo "$l" | jq -r '.object.metadata.resourceVersion') 
@@ -138,6 +141,14 @@ function getEventsOnlyNew(){
 }
 
 function getPodEventStream(){
+  # If a specific pod is given, apiReader will only return events for this pod
+  # Otherwise is will return events for all pods.
+
+  # This function is a copy of getPodEventStreamAll sofar. We hope to be able
+  # to give a resourceVersion later on, but it might be done manually.
+  # TODO : Get newest resourceVersion and only show events with a higher 
+  # resourceVersion number.
+
   local podname=$1
 
   if [ ! -z "$podname" ]; then
@@ -150,6 +161,9 @@ function getPodEventStream(){
 
 
 function getPodEventStreamAll(){
+  # If a specific pod is given, apiReader will only return events for this pod
+  # Otherwise is will return events for all pods.
+
   local podname=$1
 
   if [ ! -z "$podname" ]; then
