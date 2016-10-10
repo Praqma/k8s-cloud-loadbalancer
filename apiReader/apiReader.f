@@ -1,7 +1,8 @@
 # API describtion found here :
 #   http://kubernetes.io/docs/api-reference/v1/operations/
 #   http://kubernetes.io/kubernetes/third_party/swagger-ui/
-url="localhost:8001"
+# url="localhost:8001"
+url="localhost:8080"
 
 function getNodeIPs(){
   local nodename=$1
