@@ -5,8 +5,8 @@
 # The program lock file can be removed manually if it doesn't get deleted because of some weird reason.
 
 # Load the configuration variables from the conf file. The conf file is expected in /opt.
-if [ -r /opt/loadbalancer.conf ]; then 
-  source /opt/loadbalancer.conf
+if [ -r /usr/local/etc/loadbalancer.conf ]; then 
+  source /usr/local/etc/loadbalancer.conf
 else
   # If conf file is not in /opt, use a local copy from current directory.
   source ./loadbalancer.conf
@@ -58,8 +58,6 @@ function CHECK_FLANNEL() {
     echo
   fi
 
-
-
 }
 
 #---------------------------------------------
@@ -94,7 +92,7 @@ function CHECK_KUBE_SERVICE_FOR_LB_IP() {
   # We do not want anyone to use our primary LB IP in kubernetes services.
 
 
-  SERVICE_WITH_PRIMARY_LB_IP=$(ssh -o ConnectTimeout=5 -n ${MASTER_USER}@${MASTER_IP} "kubectl get services --all-namespaces=true | egrep -v '<none>|AGE' | grep $LB_PRIMARY_IP" )
+  SERVICE_WITH_PRIMARY_LB_IP=$(ssh -o ConnectTimeout=5 -n ${MASTER_SSH_USER}@${MASTER_IP} "kubectl get services --all-namespaces=true | egrep -v '<none>|AGE' | grep $LB_PRIMARY_IP" )
   # THe double quotes in the test are important.
   if [ ! -z "${SERVICE_WITH_PRIMARY_LB_IP}" ]; then
     echo
@@ -161,14 +159,14 @@ function Check_Master_SSH_Connectivity() {
 
 function Check_Master_SSH_Command_Execution() {
   echo
-  # echo "Check if the user $MASTER_USER is able to run commands on kubernetes master $MASTER_IP."
+  # echo "Check if the user $MASTER_SSH_USER is able to run commands on kubernetes master $MASTER_IP."
   # echo "(You may need to accept the fingerprint of the master when this script is run for the first time.)"
-  echo "Running command '$1' as user $MASTER_USER on Kubernetes Master $MASTER_IP."
+  echo "Running command '$1' as user $MASTER_SSH_USER on Kubernetes Master $MASTER_IP."
   echo
-  ssh -o ConnectTimeout=5 ${MASTER_USER}@${MASTER_IP} "$1"
+  ssh -o ConnectTimeout=5 ${MASTER_SSH_USER}@${MASTER_IP} "$1"
 
   if [ $? -gt 0 ]; then
-    echolog "There was a problem running '$1' through ${MASTER_USER}@${MASTER_IP} over SSH. Please check."
+    echolog "There was a problem running '$1' through ${MASTER_SSH_USER}@${MASTER_IP} over SSH. Please check."
     exit 9
   fi
 }
@@ -212,8 +210,8 @@ function Services_Info_Table() {
   #
   ########################################################################################################
 
-  # SERVICE_LIST=$(ssh -o ConnectTimeout=5 ${MASTER_USER}@${MASTER_IP} "kubectl get services --all-namespaces=true | egrep -v '<none>|AGE'" | tr '\n' '\n\r')
-  SERVICE_LIST=$(ssh -o ConnectTimeout=5 -n ${MASTER_USER}@${MASTER_IP} "kubectl get services --all-namespaces=true | egrep -v '<none>|AGE'" )
+  # SERVICE_LIST=$(ssh -o ConnectTimeout=5 ${MASTER_SSH_USER}@${MASTER_IP} "kubectl get services --all-namespaces=true | egrep -v '<none>|AGE'" | tr '\n' '\n\r')
+  SERVICE_LIST=$(ssh -o ConnectTimeout=5 -n ${MASTER_SSH_USER}@${MASTER_IP} "kubectl get services --all-namespaces=true | egrep -v '<none>|AGE'" )
 
   # Be careful: SSH reads from standard input and eats all remaining lines. Use ssh -n
   # Tip: from http://stackoverflow.com/questions/9393038/ssh-breaks-out-of-while-loop-in-bash
@@ -316,9 +314,9 @@ function POPULATE_SERVICE_ENDPOINTS() {
   # Receives two variables as parameters - namespace and service.
   NAMESPACE=$1
   SERVICE=$2
-  ENDPOINTS_IPS=$(ssh -o ConnectTimeout=5 -n ${MASTER_USER}@${MASTER_IP} "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICE}" | egrep -w 'ip' | sed  -e 's/\"//g'  -e 's/ip://g' -e 's/,//g' | tr -d ' ' | tr '\n' ' ' )
+  ENDPOINTS_IPS=$(ssh -o ConnectTimeout=5 -n ${MASTER_SSH_USER}@${MASTER_IP} "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICE}" | egrep -w 'ip' | sed  -e 's/\"//g'  -e 's/ip://g' -e 's/,//g' | tr -d ' ' | tr '\n' ' ' )
 
-  ENDPOINTS_PORT=$(ssh -o ConnectTimeout=5 -n ${MASTER_USER}@${MASTER_IP} "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICE}" | egrep -w 'port' | sed  -e 's/\"//g' -e 's/,//'  | cut -f 2  -d ':'  | tr -d ' '  )
+  ENDPOINTS_PORT=$(ssh -o ConnectTimeout=5 -n ${MASTER_SSH_USER}@${MASTER_IP} "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICE}" | egrep -w 'port' | sed  -e 's/\"//g' -e 's/,//'  | cut -f 2  -d ':'  | tr -d ' '  )
 
   # echo "Inserting Endpoints information in haproxy conf file ..."
   # echo "ENDPOINTS_IPS are: oooo${ENDPOINTS_IPS}OOOO"
@@ -533,8 +531,8 @@ function disabled_WRITE_ENDPOINTS_IN_CONFIG() {
 
 
   # SSH to apiserver, get endpoints from api's http interface and parse the options:
-  # ENDPOINTS_IPS=$(ssh -o ConnectTimeout=5 -n ${MASTER_USER}@${MASTER_IP} "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICENAME}" | egrep -w 'ip' | sed  -e 's/\"//g'  -e 's/ip://g' -e 's/,//g' ) 
-  # ENDPOINTS_PORT=$(ssh -o ConnectTimeout=5 ${MASTER_USER}@${MASTER_IP "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICENAME}" | egrep -w 'port' | sed  -e 's/\"//g' -e 's/,//'  | cut -f 2  -d ':' )
+  # ENDPOINTS_IPS=$(ssh -o ConnectTimeout=5 -n ${MASTER_SSH_USER}@${MASTER_IP} "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICENAME}" | egrep -w 'ip' | sed  -e 's/\"//g'  -e 's/ip://g' -e 's/,//g' ) 
+  # ENDPOINTS_PORT=$(ssh -o ConnectTimeout=5 ${MASTER_SSH_USER}@${MASTER_IP "curl -k -s  http://localhost:8080/api/v1/namespaces/${NAMESPACE}/endpoints/${SERVICENAME}" | egrep -w 'port' | sed  -e 's/\"//g' -e 's/,//'  | cut -f 2  -d ':' )
 
   # Use the database table to extract endpoints information and write configs
   sqlite3 $LB_DATABASE "select * from ServiceEndPoints where NameSpace=\'$NAMESPACE\' and ServiceName=\'$SERVICENAME\' ;" | while IFS='' read -r ENDPOINT_LINE || [[ -n "$ENDPOINT_LINE" ]]; do
