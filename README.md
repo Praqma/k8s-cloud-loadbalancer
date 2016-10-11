@@ -7,10 +7,10 @@ This loadbalancer will mimic the functionality given by cloud loadbalancers from
 This loadbalancer consists of two main components, apiReader and loadbalancer.
 
 ### apiReader
-The apiReader acts as an easy way to connect to the Kubernetes apiReader. 
+The apiReader acts as an easy way to connect to the Kubernetes api server. 
 
 ### Loadbalancer
-The Loadbalancer is the main process. It uses HAProxy to proxy services from outside the cluster.
+The Loadbalancer is the main process. It uses HAProxy to proxy services from outside the cluster. It configures HAProxy based on the data it gets from apiReader. 
 
 ## Getting started
 
