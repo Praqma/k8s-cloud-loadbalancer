@@ -3,6 +3,15 @@
 #   http://kubernetes.io/kubernetes/third_party/swagger-ui/
 url="--cacert /var/lib/kubernetes/ca.pem --cert /var/lib/kubernetes/kubernetes-combined.pem https://10.240.0.20:6443"
 
+function getNodeCIDR(){
+  local nodename=$1
+  if [ ! -z "$nodename" ]; then
+    echo $(curl -s $url/api/v1/nodes/$nodename | jq -r '.spec.podCIDR')
+  else
+    echo $(curl -s $url/api/v1/nodes | jq -r '.items[].spec.podCIDR')
+  fi
+}
+
 function getNodeIPs(){
   local nodename=$1
 
