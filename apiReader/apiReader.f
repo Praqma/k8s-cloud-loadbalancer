@@ -1,7 +1,12 @@
 # API describtion found here :
 #   http://kubernetes.io/docs/api-reference/v1/operations/
 #   http://kubernetes.io/kubernetes/third_party/swagger-ui/
+<<<<<<< HEAD
 url="--cacert /var/lib/kubernetes/ca.pem --cert /var/lib/kubernetes/kubernetes-combined.pem https://10.240.0.20:6443"
+=======
+# url="localhost:8001"
+url="localhost:8080"
+>>>>>>> de7f4612ec1a9f7af4d3021bf2ad35f9454a50ad
 
 function getNodeIPs(){
   local nodename=$1
