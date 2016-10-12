@@ -89,6 +89,16 @@ function getServiceEndpoints(){
   fi
 }
 
+function getServiceTCPPort(){
+  local service=$1
+  local namespace=$2
+
+  if [ -z "$namespace" ]; then
+    namespace=$(getServiceNamespace $service)
+  fi
+  echo $(curl -s $url/api/v1/namespaces/$namespace/endpoints/$service | jq -r '.subsets[].ports[] | select(.protocol == "TCP") | .port')
+}
+
 function getServiceNamespace(){
   local service=$1
   echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .metadata.namespace')
