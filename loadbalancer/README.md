@@ -119,7 +119,8 @@ I also have an idea of just DNAT port 6443 from the load balancer to the control
 
 
 
+**Note:**
 
-
-
+* The proxy can serve two ways. i.e. It can proxy for backend services, and at the same time, it can serve as a proxy for some special outside service.
+* Need to have a default proxy in place, as we want to use the same proxy for providing HA to Kubernetes control plane. And for that matter, Proxy must be the first thing which comes online. 
 
