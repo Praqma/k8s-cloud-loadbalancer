@@ -5,38 +5,35 @@ function createLoadBalancer(){
 
   # Setting LBType to apache, if not specified
   if [ -z "$LBType" ];then
-     echo "Setting Loadbalancer type to Apache (default"
-     LBType="apache"
+     echo "Setting HAProxy as Loadbalancer engine (default)"
+     LBType="haproxy"
   fi
-
-  rm -f *.conf 
-  rm -f *.bl 
 
   if [ "$LBType" = "apache" ]; then
     createLBApache
-  elif [ "$LBType" = "haproxy"  ]; then
+  fi
+  
+  if [ "$LBType" = "haproxy"  ]; then
     createLBHaproxy
   fi
+
+
+  # Remove the generated .cfg and .lb files
+  # The default config file is haproxy.cfg.global-defaults , which will not be deleted by the commands below.
+  rm -f *.cfg 
+  rm -f *.lb 
+
 } 
 
 function createLBHaproxy(){
+  # Need to have a way to pass the name of namespace to this function,  if not "default"
+
   local Services=$(getServices default | tr " " "\n")
   local Nodes=$(getNodeNames)
   local nodeIP=""
   local line=""
 
-  echo "global
-    stats timeout 30s" > haproxy.conf
-
-  echo "defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    timeout connect 5000
-    timeout client  50000
-    timeout server  50000
-        " >> haproxy.conf
+  cp haproxy.cfg.global-defaults haproxy.cfg
 
   printf '%s\n' "$Services" | (while IFS= read -r line
   do
@@ -45,15 +42,15 @@ function createLBHaproxy(){
     wait
   )
 
-#  echo "<SERVICES>" >> haproxy.conf
+#  echo "<SERVICES>" >> haproxy.cfg
 
   echo "listen stats *:1936
     stats enable
     stats uri /stats
     stats hide-version
-    stats auth admin:Praqma" >> haproxy.conf  
+    stats auth admin:Praqma" >> haproxy.cfg  
 
-    $(cat *.bl >> haproxy.conf)
+    $(cat *.bl >> haproxy.cfg)
     rm -f *.bl
 }
 
