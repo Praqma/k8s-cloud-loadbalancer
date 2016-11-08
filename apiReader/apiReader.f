@@ -1,7 +1,8 @@
 # API describtion found here :
 #   http://kubernetes.io/docs/api-reference/v1/operations/
 #   http://kubernetes.io/kubernetes/third_party/swagger-ui/
-url="localhost:8001"
+url="--cacert /home/hoeghh/k8s/ca.pem --cert /home/hoeghh/k8s/kubernetes-combined.pem https://10.240.0.20:6443"
+#url="localhost:8001"
 
 function getNodeIPs(){
   local nodename=$1
@@ -38,6 +39,19 @@ function getServiceNodePorts(){
   fi
 
 }
+
+function getServicePort(){
+  local service=$1
+  local namespace=$2
+
+  if [ ! -z "$namespace" ]; then
+    echo $(curl -s $url/api/v1/namespaces/$namespace/services/$service | jq -r '.spec.ports[].port')
+  else
+    echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .spec.ports[].port')
+  fi
+
+}
+
 
 function getServiceEndpoints(){
   local service=$1
