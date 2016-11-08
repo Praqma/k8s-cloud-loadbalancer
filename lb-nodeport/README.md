@@ -69,3 +69,51 @@ Commercial support is available at
 
 ## HAProxy
 If you want to output a haproxy.conf instead, then call the createLoadbalancer with the argument 'haproxy' instead. I will later split up run.sh in an Apache and HAProxy script.
+
+
+# How to create a service with Nodeport:
+```
+[root@controller1 ~]# kubectl get services
+NAME                CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
+kubernetes          10.32.0.1     <none>        443/TCP   55d
+network-multitool   10.32.0.41    10.240.0.3    80/TCP    19d
+nginx               10.32.0.237   10.240.0.2    80/TCP    49d
+[root@controller1 ~]# 
+
+[root@controller1 ~]# kubectl delete service nginx
+service "nginx" deleted
+
+
+[root@controller1 ~]# kubectl get deployments
+NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+network-multitool   1         1         1            0           28d
+nginx               4         4         4            0           52d
+[root@controller1 ~]# 
+
+[root@controller1 ~]# kubectl expose deployment nginx --port 80 --type=NodePort
+service "nginx" exposed
+
+
+[root@controller1 ~]# kubectl get services
+NAME                CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes          10.32.0.1    <none>        443/TCP   56d
+network-multitool   10.32.0.41   10.240.0.3    80/TCP    19d
+nginx               10.32.0.6    <nodes>       80/TCP    7s
+[root@controller1 ~]# 
+
+[root@controller1 ~]# kubectl describe service nginx
+Name:			nginx
+Namespace:		default
+Labels:			run=nginx
+Selector:		run=nginx
+Type:			NodePort
+IP:			10.32.0.6
+Port:			<unset>	80/TCP
+NodePort:		<unset>	32146/TCP
+Endpoints:		10.200.0.44:80,10.200.0.45:80,10.200.0.46:80 + 1 more...
+Session Affinity:	None
+No events.
+
+[root@controller1 ~]# 
+```
+
