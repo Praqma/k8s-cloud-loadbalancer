@@ -23,7 +23,6 @@ function getNodeCIDR(){
     echo $(curl -s $url/api/v1/nodes | jq -r '.items[].spec.podCIDR')
   fi
 }
->>>>>>> 37f3aecb03a6fe37d826ba2b71cb54517ef81572
 
 function getNodeIPs(){
   local nodename=$1
@@ -63,7 +62,6 @@ function getServiceNodePorts(){
 
 function getServicePort(){
   local service=$1
-<<<<<<< HEAD
   local namespace=$2
 
   if [ ! -z "$namespace" ]; then
@@ -74,16 +72,11 @@ function getServicePort(){
 
 }
 
-=======
-  echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .spec.ports[].port')
-}
-
 function getServiceClusterIP(){
   local service=$1
   ## echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .spec.clusterIP')
   echo $(curl -s ${url}/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'${service}'") | .spec.clusterIP')
 }
->>>>>>> 37f3aecb03a6fe37d826ba2b71cb54517ef81572
 
 function getServiceEndpoints(){
   local service=$1
