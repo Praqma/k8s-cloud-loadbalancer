@@ -117,3 +117,40 @@ No events.
 [root@controller1 ~]# 
 ```
 
+
+# Test the load balancer:
+
+```
+[root@lb lb-nodeport]# for i in $(seq 1 100); do curl localhost; sleep 1; done
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-ssrh6
+Container IP: 10.200.0.48
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-pvhuz
+Container IP: 10.200.0.49
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-uhtnp
+Container IP: 10.200.1.56
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-ssrh6
+Container IP: 10.200.0.48
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-ssrh6
+Container IP: 10.200.0.48
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-uhtnp
+Container IP: 10.200.1.56
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-ssrh6
+Container IP: 10.200.0.48
+<H1>Praqma Network MultiTool - nginx - It Works!</H1>
+Container Hostname: network-multitool-2164695616-lfc22
+Container IP: 10.200.0.50
+
+. . .
+``` 
+
+
+Check the stats through the HAProxy web interface: `http://10.240.0.200:1936/stats`
+
+
