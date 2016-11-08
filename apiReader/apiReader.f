@@ -1,8 +1,29 @@
 # API describtion found here :
 #   http://kubernetes.io/docs/api-reference/v1/operations/
 #   http://kubernetes.io/kubernetes/third_party/swagger-ui/
-url="--cacert /home/hoeghh/k8s/ca.pem --cert /home/hoeghh/k8s/kubernetes-combined.pem https://10.240.0.20:6443"
-#url="localhost:8001"
+#url="--cacert /var/lib/kubernetes/ca.pem --cert /var/lib/kubernetes/kubernetes-combined.pem https://10.240.0.21:6443"
+url="http://10.240.0.21:8080"
+
+function getServicesExternalIPs(){
+  local service=$1
+
+  echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name=="'$service'") | .spec.externalIPs[]')
+}
+
+function getServicesWithExternalIPs(){
+  echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.spec.externalIPs != null) | .metadata.name')
+}
+
+
+function getNodeCIDR(){
+  local nodename=$1
+  if [ ! -z "$nodename" ]; then
+    echo $(curl -s $url/api/v1/nodes/$nodename | jq -r '.spec.podCIDR')
+  else
+    echo $(curl -s $url/api/v1/nodes | jq -r '.items[].spec.podCIDR')
+  fi
+}
+>>>>>>> 37f3aecb03a6fe37d826ba2b71cb54517ef81572
 
 function getNodeIPs(){
   local nodename=$1
@@ -42,6 +63,7 @@ function getServiceNodePorts(){
 
 function getServicePort(){
   local service=$1
+<<<<<<< HEAD
   local namespace=$2
 
   if [ ! -z "$namespace" ]; then
@@ -52,6 +74,16 @@ function getServicePort(){
 
 }
 
+=======
+  echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .spec.ports[].port')
+}
+
+function getServiceClusterIP(){
+  local service=$1
+  ## echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .spec.clusterIP')
+  echo $(curl -s ${url}/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'${service}'") | .spec.clusterIP')
+}
+>>>>>>> 37f3aecb03a6fe37d826ba2b71cb54517ef81572
 
 function getServiceEndpoints(){
   local service=$1
@@ -67,8 +99,18 @@ function getServiceEndpoints(){
   # If it has endpoints, get each of them and print them
   if [ ! -z "$subset" ]; then
     echo $(curl -s $url/api/v1/namespaces/$namespace/endpoints/$service | jq -r '.subsets[].addresses[].ip')
-
+    #echo $(curl -s $url/api/v1/services/ | jq -r '.items[] | select(.metadata.name == "'$service'") | .spec.clusterIP')
   fi
+}
+
+function getServiceTCPPort(){
+  local service=$1
+  local namespace=$2
+
+  if [ -z "$namespace" ]; then
+    namespace=$(getServiceNamespace $service)
+  fi
+  echo $(curl -s $url/api/v1/namespaces/$namespace/endpoints/$service | jq -r '.subsets[].ports[] | select(.protocol == "TCP") | .port')
 }
 
 function getServiceNamespace(){

@@ -1,0 +1,5 @@
+listen mynginx
+    bind 192.168.121.11:80
+    server pod1 10.246.82.2:80 check
+    server pod2 10.246.82.6:80 check
+

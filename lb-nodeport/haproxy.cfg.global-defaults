@@ -1,0 +1,37 @@
+global
+	log	127.0.0.1 local2
+	chroot	/var/lib/haproxy
+	pidfile	/var/run/haproxy.pid
+	maxconn	4000
+	user	haproxy
+	group	haproxy
+	daemon
+
+	# turn on stats unix socket
+	stats socket /var/lib/haproxy/stats
+	stats timeout 30s
+
+defaults
+	log	global
+	mode	http
+	option  httplog
+	option  dontlognull
+	timeout connect 5000
+	timeout client  50000
+	timeout server  50000
+
+listen stats *:1936
+	stats enable
+    	stats uri /stats
+    	stats hide-version
+  	# username: admin, password: Praqma
+    	stats auth admin:Praqma
+
+
+###################################################################
+# Cluster services / listen sections below this separator.
+
+
+
+
+
