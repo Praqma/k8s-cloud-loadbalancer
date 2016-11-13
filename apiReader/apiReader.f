@@ -10,6 +10,7 @@ if [ -f apiReader.conf ] ; then
   source apiReader.conf
 else
   echo "plaase set URL to proper value, pointing to API server / controller"
+  exit 9
 fi
 
 
