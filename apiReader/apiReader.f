@@ -5,11 +5,19 @@
 # URL="--cacert /var/lib/kubernetes/ca.pem --cert /var/lib/kubernetes/kubernetes-combined.pem https://10.240.0.21:6443"
 # URL="http://10.240.0.21:8080"
 
+API_READER_CONF=/root/k8s-cloud-loadbalancer/apiReader/apiReader.conf
 
-if [ -f apiReader.conf ] ; then
-  source apiReader.conf
+if [ -f ${API_READER_CONF} ] ; then
+  source ${API_READER_CONF}
+  if [ -z "$URL" ] ; then
+     echo "URL is not defined. Exiting ..."
+     exit 8
+  else
+     echo "API server URL is: ${URL}"
+     # include a curl check for return code 200 . (todo)
+  fi
 else
-  echo "plaase set URL to proper value, pointing to API server / controller"
+  echo "${API_READER_CONF} was not found or is not readable. Plaase set URL to proper value, pointing to API server / controller."
   exit 9
 fi
 
@@ -51,6 +59,9 @@ function getNodeNames(){
 
 function getServices(){
   local namespace=$1
+
+  # Since this is a NodePort type of load balancer. It is better to extract only those services which have Type set to NodePort
+  # This is todo.
 
   if [ ! -z "$namespace" ]; then
     echo $(curl -s $URL/api/v1/namespaces/$namespace/services/ | jq -r '.items[].metadata.name')
