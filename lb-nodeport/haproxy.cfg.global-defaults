@@ -20,7 +20,8 @@ defaults
 	timeout client  50000
 	timeout server  50000
 
-listen stats *:1936
+listen stats 
+	bind *:1936
 	stats enable
     	stats uri /stats
     	stats hide-version
