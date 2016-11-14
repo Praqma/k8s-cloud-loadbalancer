@@ -38,6 +38,7 @@ else
 fi
 
 if [ $RELOAD_HAPROXY -eq 1 ]; then
+  systemctl reload haproxy
   SERVICE_EXIT_STATUS=$?
   if [ $SERVICE_EXIT_STATUS -ne 0 ] ; then
     echolog "Service haproxy not running. Restarting it ..."

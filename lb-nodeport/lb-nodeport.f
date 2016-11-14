@@ -7,7 +7,8 @@ LB_NODEPORT_CONF=/root/k8s-cloud-loadbalancer/lb-nodeport/lb-nodeport.conf
 function echolog() {
   MESSAGE=$1
   echo -e $MESSAGE
-  logger $MESSAGE
+  logger -t loadbalancer $MESSAGE
+  # use `journalctl -f -t loadbalancer` to filter out loadbalancer messages
 }
 
 # CHeck if API reader functions file is readable. Without it we are doomed :(
