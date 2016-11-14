@@ -1,5 +1,34 @@
+#!/bin/bash
 # It is important to load apireader functions, which are used in this file.
-source ../apiReader/apiReader.f
+API_READER=/root/k8s-cloud-loadbalancer/apiReader/apiReader.f
+LB_NODEPORT_CONF=/root/k8s-cloud-loadbalancer/lb-nodeport/lb-nodeport.conf
+
+
+function echolog() {
+  MESSAGE=$1
+  echo -e $MESSAGE
+  logger $MESSAGE
+}
+
+# CHeck if API reader functions file is readable. Without it we are doomed :(
+if [ -f ${API_READER} ] ; then
+  source $API_READER
+else
+  echolog "API reader was not found at location: ${API_READER}. Exiting ... "
+  exit 9
+fi 
+
+
+if [ -f ${LB_NODEPORT_CONF} ] ; then
+  source $LB_NODEPORT_CONF
+else
+  echolog "CONF file  was not found at location: ${LB_NODEPORT_CONF}. Exiting ... "
+  exit 9
+fi
+
+
+
+####################### START - tools/function #################################
 
 function createLoadBalancer(){
   local LBType=$1
@@ -8,33 +37,33 @@ function createLoadBalancer(){
   # Setting LBType to haproxy - if not specified explicitly. 
   # Apache works in a different way when used as proxy (as it is only a web proxy), so it is not recommended anyway.
   if [ -z "$LBType" ];then
-     echo "Setting HAProxy as Loadbalancer engine (default)"
+     echolog "Setting HAProxy as Loadbalancer engine (default)"
      LBType="haproxy"
   fi
 
 
   if [ -z "$NameSpace" ];then
-     echo "No NameSpace specified. Setting NameSpace to 'default'."
+     echolog "No NameSpace specified. Setting NameSpace to 'default'."
      NameSpace="default"
   fi
 
   if [ "$LBType" = "haproxy"  ]; then
-    echo "Executing: createLBHaproxy ${NameSpace}"
+    echolog "Executing: createLBHaproxy ${NameSpace}"
     createLBHaproxy ${NameSpace}
   else
-    echo "Unknown LBType passed to this function (createoadBalancer). Please investigate."
+    echolog "Unknown LBType passed to this function (createLoadBalancer). Please investigate."
   fi
 
 
 
-  ## Copy the generated config file to /etc/haproxy
-  cp haproxy.cfg /etc/haproxy/haproxy.cfg
+  echolog "Copying the generated config file to /etc/haproxy/"
+  cp ${LB_NODEPORT_PATH}/haproxy.cfg /etc/haproxy/haproxy.cfg
 
 
-  # Remove previously generated .cfg and .lb files
+  echolog "Remove previously generated .cfg and .lb files"
   # The default config file is haproxy.cfg.global-defaults , which will not be deleted by the commands below.
-  rm -f *.cfg 
-  rm -f *.lb 
+  rm -f ${LB_NODEPORT_PATH}/*.cfg 
+  rm -f ${LB_NODEPORT_PATH}/*.lb 
 
 } 
 
@@ -43,11 +72,12 @@ function createLBHaproxy(){
 
   local NameSpace=$1
   local Services=$(getServices ${NameSpace} | tr " " "\n")
+  echo "Sevice found: $Services"
   local Nodes=$(getNodeNames)
   local nodeIP=""
   local line=""
 
-  cp haproxy.cfg.global-defaults haproxy.cfg
+  cp ${LB_NODEPORT_PATH}/haproxy.cfg.global-defaults ${LB_NODEPORT_PATH}/haproxy.cfg
 
   printf '%s\n' "$Services" | (while IFS= read -r line
   do
@@ -56,10 +86,10 @@ function createLBHaproxy(){
   wait
   )
 
-#  echo "<SERVICES>" >> haproxy.cfg
+  #  echo "<SERVICES>" >> ${LB_NODEPORT_PATH}/haproxy.cfg
 
-  cat *.lb >> haproxy.cfg
-  rm -f *.lb
+  cat ${LB_NODEPORT_PATH}/*.lb >> ${LB_NODEPORT_PATH}/haproxy.cfg
+  rm -f ${LB_NODEPORT_PATH}/*.lb
 }
 
 function createServiceLBHaproxy(){
@@ -77,11 +107,14 @@ function createServiceLBHaproxy(){
 
   local ServicePort=$(getServicePort $Service $NameSpace)
 
-  local ServiceFileName="${NameSpace}.${Service}.${ServicePort}.lb"
+  local ServiceFileName="${LB_NODEPORT_PATH}/${NameSpace}.${Service}.${ServicePort}.lb"
+
+  echo "NodePort value: $NodePort"
+  echo "EndPoints value: $Endpoints"
 
   # Generate the listen section in haproxy for this particular service 
   if [ ! "$NodePort" == "null" ] && [ ! -z "$Endpoints" ]; then
-    echo "Generating service related section in ${ServiceFileName} file ..."
+    echolog "Generating service related section in ${ServiceFileName} file ..."
 
     ## Format:
     ## listen apache
@@ -109,4 +142,5 @@ function createServiceLBHaproxy(){
   fi
 
 }
+
 
