@@ -14,8 +14,6 @@ fi
 
 # We check services and compare it with our state file. If states differ, we recreate haproxy and reload.
 
-
-
 if [ -f ${LB_STATE_FILE} ] ; then
   echolog "LB state file already exits. Lets compare that (stored state) with running state..."
   getServices > /tmp/lb-nodeport.state
@@ -35,17 +33,11 @@ else
   echolog "State file does not exist. This means this is the first time it is being run on this machine! Congratulations!"
   getServices > /opt/lb-nodeport.state
   echolog "Running createLoadBalancer ..."
-
   createLoadBalancer haproxy default
   RELOAD_HAPROXY=1
 fi
 
-
-
 if [ $RELOAD_HAPROXY -eq 1 ]; then
-
-  echolog "Reloading haproxy service ..."
-  systemctl reload haproxy
   SERVICE_EXIT_STATUS=$?
   if [ $SERVICE_EXIT_STATUS -ne 0 ] ; then
     echolog "Service haproxy not running. Restarting it ..."
@@ -55,5 +47,4 @@ if [ $RELOAD_HAPROXY -eq 1 ]; then
   sleep 3
   systemctl status haproxy --no-pager -l
 fi
-
 
