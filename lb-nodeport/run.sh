@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source tools.f
+source lb-nodeport.f
 
 echo " - Running createLoadBalancer"
 createLoadBalancer haproxy default
