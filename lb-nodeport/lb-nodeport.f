@@ -1,7 +1,15 @@
 #!/bin/bash
 # It is important to load apireader functions, which are used in this file.
-API_READER=/root/k8s-cloud-loadbalancer/apiReader/apiReader.f
-LB_NODEPORT_CONF=/root/k8s-cloud-loadbalancer/lb-nodeport/lb-nodeport.conf
+
+SCRIPT_PATH=$(dirname $0)
+pushd $(pwd)
+cd $SCRIPT_PATH
+
+
+
+API_READER=${SCRIPT_PATH}/../apiReader/apiReader.f
+
+LB_NODEPORT_CONF=${SCRIPT_PATH}/lb-nodeport.conf
 
 
 function echolog() {
@@ -144,4 +152,4 @@ function createServiceLBHaproxy(){
 
 }
 
-
+popd
