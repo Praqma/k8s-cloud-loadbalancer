@@ -1,0 +1,45 @@
+[root@dockerhost dns]# for i in $(seq 1 6); do echo $i ; echo "iptables -t nat " >> /tmp/testfile;  done
+1
+2
+3
+4
+5
+6
+[root@dockerhost dns]# cat /tmp/testfile 
+iptables -t nat 
+iptables -t nat 
+iptables -t nat 
+iptables -t nat 
+iptables -t nat 
+iptables -t nat 
+[root@dockerhost dns]# paste /tmp/testfile $(iptables-save -n | grep PRAQMA | tr '\-A' '\-D'^C
+[root@dockerhost dns]# iptables-save -n | grep PRAQMA | tr '\-A' '\-D' > /tmp/rightside.txt
+iptables-save: invalid option -- 'n'
+[root@dockerhost dns]# iptables-save -t nat | grep PRAQMA | tr '\-A' '\-D' > /tmp/rightside.txt
+[root@dockerhost dns]# cat /tmp/rightside.txt 
+-D DOCKER -d 192.168.124.101/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/hungry_archimedes\"" -m multiport --dports 80,443 -j DNDT --to-destination 172.17.0.2
+-D DOCKER -d 192.168.124.102/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/elegant_hugle\"" -m multiport --dports 8080 -j DNDT --to-destination 172.17.0.3
+-D DOCKER -d 192.168.124.103/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/pensive_kare\"" -m multiport --dports 443,80 -j DNDT --to-destination 172.17.0.4
+-D DOCKER -d 192.168.124.101/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/loving_wing\"" -m multiport --dports 443,80 -j DNDT --to-destination 172.17.0.2
+-D DOCKER -d 192.168.124.102/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/elegant_hugle\"" -m multiport --dports 8080 -j DNDT --to-destination 172.17.0.3
+-D DOCKER -d 192.168.124.103/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/pensive_kare\"" -m multiport --dports 80,443 -j DNDT --to-destination 172.17.0.4
+[root@dockerhost dns]# paste /tmp/testfile /tmp/rightside.txt 
+iptables -t nat 	-D DOCKER -d 192.168.124.101/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/hungry_archimedes\"" -m multiport --dports 80,443 -j DNDT --to-destination 172.17.0.2
+iptables -t nat 	-D DOCKER -d 192.168.124.102/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/elegant_hugle\"" -m multiport --dports 8080 -j DNDT --to-destination 172.17.0.3
+iptables -t nat 	-D DOCKER -d 192.168.124.103/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/pensive_kare\"" -m multiport --dports 443,80 -j DNDT --to-destination 172.17.0.4
+iptables -t nat 	-D DOCKER -d 192.168.124.101/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/loving_wing\"" -m multiport --dports 443,80 -j DNDT --to-destination 172.17.0.2
+iptables -t nat 	-D DOCKER -d 192.168.124.102/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/elegant_hugle\"" -m multiport --dports 8080 -j DNDT --to-destination 172.17.0.3
+iptables -t nat 	-D DOCKER -d 192.168.124.103/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRDQMD-/pensive_kare\"" -m multiport --dports 80,443 -j DNDT --to-destination 172.17.0.4
+[root@dockerhost dns]# iptables-save -t nat | grep PRAQMA  > /tmp/rightside.txt
+[root@dockerhost dns]# sed -i 's/-A/-D/g' /tmp/rightside.txt 
+[root@dockerhost dns]# paste /tmp/testfile /tmp/rightside.txt 
+iptables -t nat 	-D DOCKER -d 192.168.124.101/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRAQMA-/hungry_archimedes\"" -m multiport --dports 80,443 -j DNAT --to-destination 172.17.0.2
+iptables -t nat 	-D DOCKER -d 192.168.124.102/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRAQMA-/elegant_hugle\"" -m multiport --dports 8080 -j DNAT --to-destination 172.17.0.3
+iptables -t nat 	-D DOCKER -d 192.168.124.103/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRAQMA-/pensive_kare\"" -m multiport --dports 443,80 -j DNAT --to-destination 172.17.0.4
+iptables -t nat 	-D DOCKER -d 192.168.124.101/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRAQMA-/loving_wing\"" -m multiport --dports 443,80 -j DNAT --to-destination 172.17.0.2
+iptables -t nat 	-D DOCKER -d 192.168.124.102/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRAQMA-/elegant_hugle\"" -m multiport --dports 8080 -j DNAT --to-destination 172.17.0.3
+iptables -t nat 	-D DOCKER -d 192.168.124.103/32 ! -i docker0 -p tcp -m tcp -m comment --comment "\"PRAQMA-/pensive_kare\"" -m multiport --dports 80,443 -j DNAT --to-destination 172.17.0.4
+[root@dockerhost dns]# paste /tmp/testfile /tmp/rightside.txt | bash
+[root@dockerhost dns]# iptables-save -t nat | grep PRAQMA 
+[root@dockerhost dns]# 
+

@@ -11,7 +11,3 @@
 @			IN 	A	192.168.124.200
 dockerhost.toolbox.acme.com.	IN	A	192.168.124.200
 dns.toolbox.acme.com.		IN	CNAME	dockerhost.toolbox.acme.com.
-tomcat.toolbox.acme.com.	IN	A 	192.168.124.101
-nginx.toolbox.acme.com.		IN	A 	192.168.124.102
-apache.toolbox.acme.com.	IN	A 	192.168.124.103
-
